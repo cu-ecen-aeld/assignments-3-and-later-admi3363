@@ -8,10 +8,22 @@ writestr=$2;
 #Exits with return value 1 error and print statements if any of the parameters above were not specified
 if [ $# -lt 2 ] 
 then
-    echo "Incorrect number of input params"
+    echo "Incorrect number of input args"
     exit 1
 fi
 
 #Creates a new file with name and path writefile with content writestr, overwriting any existing file and creating the path if it doesn’t exist. 
 #Exits with value 1 and error print statement if the file could not be created.
-mkdir ${writefile}
+filename=$(basename ${writefile})
+#rm -rf "${writefile}"
+mkdir -p ${writefile}
+
+#cd writefile
+
+if [ -d "$writefile" ]
+then
+	touch filename>>${writestr}
+else
+    echo "$writefile was not created"
+	exit 1
+fi

@@ -22,10 +22,16 @@ then
     #change to requested directory to be able to loop through files
     cd ${filesdir};
 
+    numberOfFiles=$(find ${filesdir} | wc -l)
+
     #loop through all the files in this directory and look for the search string(param 2)
-    echo "${filesdir} exists"
+    grep "$searchstr" "$filesdir" | while read -r line; 
+    do
+        numberOfMatchingLines=$((numberOfMatchingLines++))
+    done
+    
 else
-    echo "Directory [${filesdir}] does not match a known directory"
+    echo "Directory [${filesdir}] does not represent a directory on the filesystem"
     exit 1
 fi
 
