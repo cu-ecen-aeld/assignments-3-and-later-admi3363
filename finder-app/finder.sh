@@ -17,19 +17,16 @@ numberOfFiles=0
 numberOfMatchingLines=0
 
 #Exits with return value 1 error and print statements if filesdir does not represent a directory on the filesystem
-if [ -d "$filesdir" ]
+if [ -d "${filesdir}" ]
 then
     #change to requested directory to be able to loop through files
     cd ${filesdir};
 
-    numberOfFiles=$(find ${filesdir} | wc -l)
+    #get the number of files
+    numberOfFiles=$(find -L ${filesdir} -type f | wc -l)
 
     #loop through all the files in this directory and look for the search string(param 2)
-    grep "$searchstr" "$filesdir" | while read -r line; 
-    do
-        numberOfMatchingLines=$((numberOfMatchingLines++))
-    done
-    
+    numberOfMatchingLines=$(grep -R ${searchstr} ${filesdir} | wc -l)
 else
     echo "Directory [${filesdir}] does not represent a directory on the filesystem"
     exit 1

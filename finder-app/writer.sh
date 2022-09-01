@@ -14,15 +14,15 @@ fi
 
 #Creates a new file with name and path writefile with content writestr, overwriting any existing file and creating the path if it doesn’t exist. 
 #Exits with value 1 and error print statement if the file could not be created.
+directory=$(dirname ${writefile})
 filename=$(basename ${writefile})
-#rm -rf "${writefile}"
-mkdir -p ${writefile}
+mkdir -p ${directory}
 
-#cd writefile
+cd ${directory}
 
-if [ -d "$writefile" ]
-then
-	touch filename>>${writestr}
+if [ -d "${directory}" ]
+then 
+    echo ${writestr}>${filename}
 else
     echo "$writefile was not created"
 	exit 1
