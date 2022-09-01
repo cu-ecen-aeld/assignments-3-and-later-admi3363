@@ -16,6 +16,8 @@ fi
 #Exits with value 1 and error print statement if the file could not be created.
 directory=$(dirname ${writefile})
 filename=$(basename ${writefile})
+
+#make the directory
 mkdir -p ${directory}
 
 cd ${directory}
