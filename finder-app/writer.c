@@ -12,10 +12,10 @@ int main(int argc, char *argv[])
 
     FILE *pFile;
 
-    char fileName[100];
-    fileName="adamtest.txt";//argv[0];
+    //char fileName[100];
+    //fileName="adamtest.txt";//argv[0];
 
-    pFile=fopen(fileName, "w");
+    pFile=fopen(argv[0], "w");
 
     if(pFile==NULL)
     {
