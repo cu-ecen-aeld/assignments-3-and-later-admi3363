@@ -16,8 +16,15 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
-
-    return true;
+    int ret = system(cmd);
+    if(ret == 0)
+    {
+        return true;
+    }
+    else
+    {   
+        return false;
+    }
 }
 
 /**
@@ -59,6 +66,19 @@ bool do_exec(int count, ...)
  *
 */
 
+
+    int ret;
+    int status;
+    pid_t pid;
+
+    pid = fork();
+
+    if(pid == -1) return pid;
+
+    ret = execv(command[0], command);
+
+    wait(&status);
+
     va_end(args);
 
     return true;
@@ -92,6 +112,8 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+
+    execv( "/bin/sh", "/bin/sh", "-c", "cat ${STDOUT} > ${outputfile}", (char *)NULL);
 
     va_end(args);
 
