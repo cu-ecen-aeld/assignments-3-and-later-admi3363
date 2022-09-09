@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -20,13 +21,13 @@ bool do_system(const char *cmd)
  *   or false() if it returned a failure
 */
     int ret = system(cmd);
-    if(ret == 0)
+    if(ret == -1)
     {
-        return true;
+        return false;
     }
     else
     {   
-        return false;
+        return true;
     }
 }
 
@@ -75,11 +76,25 @@ bool do_exec(int count, ...)
 
     pid = fork();
 
-    if(pid == -1) return -1;
+    if(pid == -1)
+    {
+        return false;
+    }
+    else if (pid == 0)
+    {
+        execv(command[0], command);
 
-    execv(command[0], command);
+        exit(-1);
+    }
 
-    wait(&status);
+    if (waitpid (pid, &status, 0) ==  -1)
+    {
+        return false;
+    }
+    else if (WIFEXITED (status))
+    {
+        if(status != 0) return false;
+    }
 
     va_end(args);
 
@@ -118,6 +133,9 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     int status;
     pid_t pid;
 
+    int fd = open("${outputfile}", O_WRONLY|O_TRUNC|O_CREAT, 0644);
+    if (fd < 0) { perror("open"); abort(); }
+
     char *argv[4];
     argv[0] = "/bin/sh";
     argv[1] = "-c";
@@ -128,13 +146,24 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
 
     pid = fork();
 
-    if(pid == -1) return -1;
+    if(pid == -1)
+    {
+        return false;
+    }
+    else if (pid == 0)
+    {
+        execv ("/bin/sh", argv);
+        exit(-1);
+    }
 
-    execv ("/bin/sh", argv);
-
-
-    waitpid (pid, &status, 0);
-
+    if (waitpid (pid, &status, 0) ==  -1)
+    {
+        return false;
+    }
+    else if (WIFEXITED (status))
+    {
+        if(status != 0) return false;
+    }
     va_end(args);
 
     return true;
