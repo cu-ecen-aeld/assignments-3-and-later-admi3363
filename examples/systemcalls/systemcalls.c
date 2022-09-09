@@ -73,11 +73,11 @@ bool do_exec(int count, ...)
 
     pid = fork();
 
-    if(pid == -1) return pid;
+    if(pid == -1) return -1;
 
     ret = execv(command[0], command);
 
-    wait(&status);
+    if(waitpid (pid, &status, 0) == -1) return -1;
 
     va_end(args);
 
@@ -113,7 +113,17 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *
 */
 
-    execv( "/bin/sh", "/bin/sh", "-c", "cat ${STDOUT} > ${outputfile}", (char *)NULL);
+    int ret;
+    int status;
+    pid_t pid;
+
+    pid = fork();
+
+    if(pid == -1) return -1;
+
+    ret = execv( "/bin/sh", "/bin/sh", "-c", "cat ${STDOUT} > ${outputfile}", (char *)NULL);
+
+    if(waitpid (pid, &status, 0) == -1) return -1;
 
     va_end(args);
 
