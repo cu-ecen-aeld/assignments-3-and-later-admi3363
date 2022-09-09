@@ -1,4 +1,7 @@
 #include "systemcalls.h"
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -67,7 +70,6 @@ bool do_exec(int count, ...)
 */
 
 
-    int ret;
     int status;
     pid_t pid;
 
@@ -75,9 +77,9 @@ bool do_exec(int count, ...)
 
     if(pid == -1) return -1;
 
-    ret = execv(command[0], command);
+    execv(command[0], command);
 
-    if(waitpid (pid, &status, 0) == -1) return -1;
+    wait(&status);
 
     va_end(args);
 
@@ -113,17 +115,25 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *
 */
 
-    int ret;
     int status;
     pid_t pid;
+
+    char *argv[4];
+    argv[0] = "/bin/sh";
+    argv[1] = "-c";
+    argv[2] = "cat ${STDOUT} > ${outputfile}";
+    argv[3] = NULL;
+
+    execv ("/bin/sh", argv);
 
     pid = fork();
 
     if(pid == -1) return -1;
 
-    ret = execv( "/bin/sh", "/bin/sh", "-c", "cat ${STDOUT} > ${outputfile}", (char *)NULL);
+    execv ("/bin/sh", argv);
 
-    if(waitpid (pid, &status, 0) == -1) return -1;
+
+    waitpid (pid, &status, 0);
 
     va_end(args);
 
