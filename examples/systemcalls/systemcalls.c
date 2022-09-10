@@ -133,16 +133,21 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     int status;
     pid_t pid;
 
-    int fd = open("${outputfile}", O_WRONLY|O_TRUNC|O_CREAT, 0644);
-    if (fd < 0) { perror("open"); abort(); }
+    //printf("\r\noutput file = %s\r\n", outputfile);
+
+    int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+    if (fd < 0) return false;
 
     char *argv[4];
-    argv[0] = "/bin/sh";
+    //argv[0] = "/bin/sh";
+    argv[0] = command[0];
     argv[1] = "-c";
     argv[2] = "cat ${STDOUT} > ${outputfile}";
+    //argv[2] = "cat ${STDOUT} > outputfile}";
     argv[3] = NULL;
 
-    execv ("/bin/sh", argv);
+    //execv ("/bin/sh", argv);
+    execv (command[0], command);
 
     pid = fork();
 
