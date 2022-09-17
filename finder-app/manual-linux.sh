@@ -36,10 +36,19 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     git checkout ${KERNEL_VERSION}
 
     # TODO: Add your kernel build steps here
+    echo "kernel build step - mrproper"
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
+
+    echo "kernel build step - defconfig"
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} defconfig
+
+    echo "kernel build step - all"
     make -j4 ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} all
+
+    echo "kernel build step - modules"
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} modules
+
+    echo "kernel build step - dtbs"
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} dtbs
 
 fi
@@ -71,27 +80,35 @@ git clone git://busybox.net/busybox.git
     cd busybox
     git checkout ${BUSYBOX_VERSION}
     # TODO:  Configure busybox
+    echo "busybox build step - distclean"
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} distclean
+
+    echo "busybox build step - defconfig"
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} defconfig
 else
     cd busybox
 fi
 
 # TODO: Make and install busybox
-sudo make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} eabi- install
+#make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} CONFIG_PREFIX=${OUTDIR}/rootfs install
 
 echo "Library dependencies"
-${CROSS_COMPILE}readelf -a bin/busybox | grep "program interpreter"
-${CROSS_COMPILE}readelf -a bin/busybox | grep "Shared library"
+# ${CROSS_COMPILE}readelf -a bin/busybox | grep "program interpreter"
+# ${CROSS_COMPILE}readelf -a bin/busybox | grep "Shared library"
+${CROSS_COMPILE}readelf -a busybox | grep "program interpreter"
+${CROSS_COMPILE}readelf -a busybox | grep "Shared library"
 
 # TODO: Add library dependencies to rootfs
 cd ${OUTDIR}/rootfs
 
-SYSROOT=$(${CROSS_COMPILE}gcc -print-sysroot)
-cp $SYSROOT/lib/ld-linux-aarch64.so.1 lib
-cp $SYSROOT/lib64/libresolv.so.2 lib64
-cp $SYSROOT/lib64/libm.so.6 lib64
-cp $SYSROOT/lib64/libc.so.6 lib64
+#SYSROOT=$(${CROSS_COMPILE} -print-sysroot)
+#SYSROOT="aarch64-none-linux-gnu-gcc -print-sysroot"
+SYSROOT="/home/atom/ARM/install-lnx/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/../aarch64-none-linux-gnu/libc"
+cp "${SYSROOT}"/lib/ld-linux-aarch64.so.1 lib
+cp "${SYSROOT}"/lib64/libresolv.so.2 lib64
+cp "${SYSROOT}"/lib64/libm.so.6 lib64
+cp "${SYSROOT}"/lib64/libc.so.6 lib64
 
 
 # TODO: Make device nodes
@@ -100,17 +117,20 @@ sudo mknod -m 666 dev/console c 5 1
 
 # TODO: Clean and build the writer utility
 cd ${FINDER_APP_DIR}
-sudo make clean
-sudo make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+echo "Build Writer"
+make clean
+# make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
+make CROSS_COMPILE=${CROSS_COMPILE} writer
 
 
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
-cp ./writer ${OUTDIR}/rootfs/home
-cp ./finder.sh ${OUTDIR}/rootfs/home
-cp ./finder-test.sh ${OUTDIR}/rootfs/home
-cp ./autorun-qemu.sh ${OUTDIR}/rootfs/home
-cp ./conf/username.txt ${OUTDIR}/rootfs/home
+echo "Copying Writer Files"
+sudo cp writer ${OUTDIR}/rootfs/home
+sudo cp finder.sh ${OUTDIR}/rootfs/home
+sudo cp finder-test.sh ${OUTDIR}/rootfs/home
+sudo cp autorun-qemu.sh ${OUTDIR}/rootfs/home
+sudo cp conf/username.txt ${OUTDIR}/rootfs/home
 
 
 # TODO: Chown the root directory
@@ -120,4 +140,4 @@ sudo chown -R root:root *
 # TODO: Create initramfs.cpio.gz
 find . | cpio -H newc -ov --owner root:root > ../initramfs.cpio
 cd ..
-gzip -f initramfs.cpio
+gzip initramfs.cpio

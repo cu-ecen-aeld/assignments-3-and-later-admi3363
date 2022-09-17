@@ -1,27 +1,17 @@
-INCLUDE_DIRS = 
-LIB_DIRS = 
-CC=$(CROSS_COMPILE)gcc
+#CC=$(CROSS_COMPILE)gcc
+CC=aarch64-none-linux-gnu-gcc
 
-CDEFS=
-CFLAGS= -O0 -g $(INCLUDE_DIRS) $(CDEFS)
-LIBS= 
-
-HFILES= 
+CFLAGS= -g -Wall
 CFILES= writer.c
+OUTPUT=writer
 
 SRCS= ${HFILES} ${CFILES}
 OBJS= ${CFILES:.c=.o}
 
-all:	writer
+all: writer
+	aarch64-none-linux-gnu-gcc -g -Wall writer.c -o writer
+
 
 clean:
 	-rm -f *.o *.d
-	-rm -f writer
-
-hello: writer.o 
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $@.o -lpthread
-
-depend:
-
-.c.o:
-	$(CC) $(CFLAGS) -c $<
+	-rm -f $(OUTPUT)
