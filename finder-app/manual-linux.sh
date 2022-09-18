@@ -103,12 +103,12 @@ ${CROSS_COMPILE}readelf -a busybox | grep "Shared library"
 cd ${OUTDIR}/rootfs
 
 #SYSROOT=$(${CROSS_COMPILE} -print-sysroot)
-#SYSROOT="aarch64-none-linux-gnu-gcc -print-sysroot"
-SYSROOT="/home/atom/ARM/install-lnx/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/../aarch64-none-linux-gnu/libc"
-cp "${SYSROOT}"/lib/ld-linux-aarch64.so.1 lib
-cp "${SYSROOT}"/lib64/libresolv.so.2 lib64
-cp "${SYSROOT}"/lib64/libm.so.6 lib64
-cp "${SYSROOT}"/lib64/libc.so.6 lib64
+SYSROOT=$(aarch64-none-linux-gnu-gcc -print-sysroot)
+#SYSROOT="/home/atom/ARM/install-lnx/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/../aarch64-none-linux-gnu/libc"
+cp ${SYSROOT}/lib/ld-linux-aarch64.so.1 lib
+cp ${SYSROOT}/lib64/libresolv.so.2 lib64
+cp ${SYSROOT}/lib64/libm.so.6 lib64
+cp ${SYSROOT}/lib64/libc.so.6 lib64
 
 
 # TODO: Make device nodes
