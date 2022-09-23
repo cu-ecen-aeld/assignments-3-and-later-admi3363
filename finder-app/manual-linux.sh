@@ -54,6 +54,8 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
 fi
 
 echo "Adding the Image in outdir"
+cd "$OUTDIR"
+cp linux-stable/arch/arm64/boot/Image "$OUTDIR"
 
 echo "Creating the staging directory for the root filesystem"
 cd "$OUTDIR"
@@ -130,7 +132,8 @@ sudo cp writer ${OUTDIR}/rootfs/home
 sudo cp finder.sh ${OUTDIR}/rootfs/home
 sudo cp finder-test.sh ${OUTDIR}/rootfs/home
 sudo cp autorun-qemu.sh ${OUTDIR}/rootfs/home
-sudo cp conf/username.txt ${OUTDIR}/rootfs/home
+mkdir ${OUTDIR}/rootfs/home/conf
+sudo cp conf/username.txt ${OUTDIR}/rootfs/home/conf
 
 
 # TODO: Chown the root directory
