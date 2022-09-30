@@ -15,7 +15,7 @@ int main(int argc, char const* argv[])
 	struct sockaddr_in address;
 	int opt = 1;
 	int addrlen = sizeof(address);
-	char buffer[1024] = { 0 };
+	//char buffer[1024] = { 0 };
 	char read_message[2000];
 
 	// Creating socket
@@ -57,10 +57,15 @@ int main(int argc, char const* argv[])
 
 	while( 1==1 )
 	{
-		if((read_size = recv(new_socket , read_message , 2000 , 0)) > 0 )
+		while((read_size = recv(new_socket , read_message , 2000 , 0)) > 0 )
 		{
-			//fwrite(string, sizeof char, strlen(string), fp);
 			fprintf(fp, "%s", read_message);
+
+			//fwrite(read_message, sizeof char, strlen(read_message), fp);
+			//if (read_message[strlen(read_message) - 1] == '\n')
+			//{
+				//fprintf(fp, "%s", read_message);
+			//}
 		}
 	}
 
