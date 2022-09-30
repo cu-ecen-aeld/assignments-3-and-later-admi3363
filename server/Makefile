@@ -2,18 +2,15 @@ CC=gcc
 #CC=aarch64-none-linux-gnu-gcc
 
 CFLAGS= -g -Wall
-
-HFILES= 
 CFILES= aesdsocket.c
+OUTPUT=aesdsocket
 
 SRCS= ${HFILES} ${CFILES}
 OBJS= ${CFILES:.c=.o}
 
-all:	aesdsocket
+all: 
+	$(CC) aesdsocket.c -o aesdsocket
 
 clean:
 	-rm -f *.o *.d
-	-rm -f aesdsocket
-
-game: game.o
-	$(CC) $(CFLAGS) -o $@ $@.o -lpthread
+	-rm -f $(OUTPUT)

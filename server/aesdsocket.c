@@ -5,18 +5,32 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <signal.h>
 
 
 #define PORT 9000
 
+int server_fd;
+int accepted_connection;
+FILE *fp = NULL;
+
+
+void sigintHandler(int sig);
+
 int main(int argc, char const* argv[])
 {
-	int server_fd, new_socket, read_size;
+	int read_size;
 	struct sockaddr_in address;
 	int opt = 1;
 	int addrlen = sizeof(address);
-	//char buffer[1024] = { 0 };
-	char read_message[2000];
+	char buffer[2000] = { 0 };
+	size_t current_size = 0;
+	char recv_message;
+	pid_t pid;
+
+	signal(SIGINT, sigintHandler);
+	signal(SIGTERM, sigintHandler);
+
 
 	// Creating socket
 	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
@@ -41,43 +55,100 @@ int main(int argc, char const* argv[])
 		return -1;
 	}
 
-	if (listen(server_fd, 3) < 0) 
-    {
-		syslog(LOG_ERR,"listen failed");
-		return -1;
-	}
-
-	if ((new_socket = accept(server_fd, (struct sockaddr*)&address,(socklen_t*)&addrlen))< 0) 
-    {
-		syslog(LOG_ERR,"accept failed");
-		return -1;
-	}
-
-	FILE *fp = fopen("/var/tmp/aesdsocketdata","w");
-
-	while( 1==1 )
+	//fork after binding to port
+	if(argc==2 && argv[1][1] == 'd') 
 	{
-		while((read_size = recv(new_socket , read_message , 2000 , 0)) > 0 )
+		pid = fork();
+
+		if (setsid() < 0)
 		{
-			fprintf(fp, "%s", read_message);
-
-			//fwrite(read_message, sizeof char, strlen(read_message), fp);
-			//if (read_message[strlen(read_message) - 1] == '\n')
-			//{
-				//fprintf(fp, "%s", read_message);
-			//}
+     		return -1;
 		}
-	}
+	
+		if (pid > 0)
+		{
+			return -1;
+		}
+    }
 
-	syslog(LOG_USER,"Caught signal, exiting");
+	fp = fopen("/var/tmp/aesdsocketdata","w+");
+
+	while(1)
+	{
+		if (listen(server_fd, 5) < 0) 
+		{
+			syslog(LOG_ERR,"listen failed");
+			return -1;
+		}
+
+		if ((accepted_connection = accept(server_fd, (struct sockaddr*)&address,(socklen_t*)&addrlen))< 0) 
+		{
+			syslog(LOG_ERR,"accept failed");
+			return -1;
+		}
+
+		syslog(LOG_USER,"Accepted a connection");
+
+		// int recv_response
+		// do
+		// {
+		// 	recv_response = recv(accepted_connection, &recv_message, 1, 0);
+		// 	if(recv_response < 0) 
+		// 	{
+		// 		return -1;
+		// 	}
+
+		// 	fprintf(fp, "%c", recv_message);
+		// } while (recv_message != '\n');
+
+
+
+		int recv_response;
+		while(recv_message != '\n')
+		{
+			recv_response = recv(accepted_connection, &recv_message, 1, 0);
+			fprintf(fp, "%c", recv_message);
+			//write(fp, recv_message, strlen(recv_message));
+			//buffer[current_size++] = recv_message;
+		}
+
+		int i = 0;
+		while(i < current_size)
+		{
+			//recv_response = recv(accepted_connection, &recv_message, 1, MSG_WAITALL);
+			//write(accepted_connection, buffer[current_size], 1);
+			current_size--;
+		}
+
+		int justwanttoseeifigethere;
+		printf("I got where i was looking");
+
+		//client disconnected
+	}
 	
 	fclose(fp);
 	syslog(LOG_USER,"removing file...");
 	remove("/var/tmp/aesdsocketdata");
 
 	// closing the connected socket
-	close(new_socket);
+	close(accepted_connection);
+	syslog(LOG_USER,"Closed client connection");
 	// closing the listening socket
 	shutdown(server_fd, SHUT_RDWR);
 	return 0;
+}
+
+void sigintHandler(int sig)
+{
+	syslog(LOG_USER,"Caught signal, exiting");
+
+    // closing the connected socket
+	close(accepted_connection);
+	syslog(LOG_USER,"Closed client connection");
+	// closing the listening socket
+	shutdown(server_fd, SHUT_RDWR);
+
+	fclose(fp);
+	syslog(LOG_USER,"removing file...");
+	remove("/var/tmp/aesdsocketdata");
 }
