@@ -1,4 +1,4 @@
-CC=gcc
+#CC=gcc
 #CC=aarch64-none-linux-gnu-gcc
 
 CFLAGS= -g -Wall
@@ -14,3 +14,6 @@ all:
 clean:
 	-rm -f *.o *.d
 	-rm -f $(OUTPUT)
+
+default: 
+	$(CC) aesdsocket.c -o aesdsocket

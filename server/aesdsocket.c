@@ -13,20 +13,27 @@
 int server_fd;
 int accepted_connection;
 FILE *fp = NULL;
+char connected_ip[INET_ADDRSTRLEN];
 
 
 void sigintHandler(int sig);
 
 int main(int argc, char const* argv[])
 {
-	int read_size;
+	int recv_response;
 	struct sockaddr_in address;
 	int opt = 1;
 	int addrlen = sizeof(address);
-	char buffer[2000] = { 0 };
-	size_t current_size = 0;
+	//char buffer[2000] = { 0 };
+	//size_t current_size = 0;
 	char recv_message;
 	pid_t pid;
+	char char_from_file;
+
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = INADDR_ANY;
+	address.sin_port = htons(PORT);
+	
 
 	signal(SIGINT, sigintHandler);
 	signal(SIGTERM, sigintHandler);
@@ -44,10 +51,6 @@ int main(int argc, char const* argv[])
 		syslog(LOG_ERR,"failed setting socket options");
 		return -1;
 	}
-
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(PORT);
 
 	if (bind(server_fd, (struct sockaddr*)&address,sizeof(address))< 0) 
     {
@@ -71,8 +74,10 @@ int main(int argc, char const* argv[])
 		}
     }
 
+	//open file
 	fp = fopen("/var/tmp/aesdsocketdata","w+");
 
+	//loop until SIGINT or SIGTERM
 	while(1)
 	{
 		if (listen(server_fd, 5) < 0) 
@@ -87,52 +92,38 @@ int main(int argc, char const* argv[])
 			return -1;
 		}
 
-		syslog(LOG_USER,"Accepted a connection");
+		inet_ntop(AF_INET, &(address.sin_addr), connected_ip, INET_ADDRSTRLEN);
 
-		// int recv_response
-		// do
-		// {
-		// 	recv_response = recv(accepted_connection, &recv_message, 1, 0);
-		// 	if(recv_response < 0) 
-		// 	{
-		// 		return -1;
-		// 	}
+		syslog(LOG_USER,"Accepted connection from %s", connected_ip);
+		printf("Accepted connection from %s\n", connected_ip);
 
-		// 	fprintf(fp, "%c", recv_message);
-		// } while (recv_message != '\n');
-
-
-
-		int recv_response;
 		while(recv_message != '\n')
 		{
 			recv_response = recv(accepted_connection, &recv_message, 1, 0);
 			fprintf(fp, "%c", recv_message);
-			//write(fp, recv_message, strlen(recv_message));
-			//buffer[current_size++] = recv_message;
+			printf("%c", recv_message);
 		}
 
-		int i = 0;
-		while(i < current_size)
+		//read from file and send back all data
+		rewind(fp);
+		while (!feof(fp)) 
 		{
-			//recv_response = recv(accepted_connection, &recv_message, 1, MSG_WAITALL);
-			//write(accepted_connection, buffer[current_size], 1);
-			current_size--;
+			char_from_file = fgetc(fp);
+			send(accepted_connection, &char_from_file, 1, 0);
 		}
-
-		int justwanttoseeifigethere;
-		printf("I got where i was looking");
 
 		//client disconnected
 	}
 	
 	fclose(fp);
 	syslog(LOG_USER,"removing file...");
+	printf("removing file...\n");
 	remove("/var/tmp/aesdsocketdata");
 
 	// closing the connected socket
 	close(accepted_connection);
-	syslog(LOG_USER,"Closed client connection");
+	syslog(LOG_USER,"Closed connection from %s", connected_ip);
+	printf("Closed connection from %s\n", connected_ip);
 	// closing the listening socket
 	shutdown(server_fd, SHUT_RDWR);
 	return 0;
@@ -141,14 +132,17 @@ int main(int argc, char const* argv[])
 void sigintHandler(int sig)
 {
 	syslog(LOG_USER,"Caught signal, exiting");
+	printf("Caught signal, exiting\n");
 
     // closing the connected socket
 	close(accepted_connection);
-	syslog(LOG_USER,"Closed client connection");
+	syslog(LOG_USER,"Closed connection from %s", connected_ip);
+	printf("Closed connection from %s\n", connected_ip);
 	// closing the listening socket
 	shutdown(server_fd, SHUT_RDWR);
 
 	fclose(fp);
 	syslog(LOG_USER,"removing file...");
+	printf("removing file...\n");
 	remove("/var/tmp/aesdsocketdata");
 }
