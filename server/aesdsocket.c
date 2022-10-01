@@ -14,6 +14,7 @@ int server_fd;
 int accepted_connection;
 FILE *fp = NULL;
 char connected_ip[INET_ADDRSTRLEN];
+int is_client_disconnected = 0;
 
 
 void sigintHandler(int sig);
@@ -24,8 +25,6 @@ int main(int argc, char const* argv[])
 	struct sockaddr_in address;
 	int opt = 1;
 	int addrlen = sizeof(address);
-	//char buffer[2000] = { 0 };
-	//size_t current_size = 0;
 	char recv_message;
 	pid_t pid;
 	char char_from_file;
@@ -97,53 +96,55 @@ int main(int argc, char const* argv[])
 		syslog(LOG_USER,"Accepted connection from %s", connected_ip);
 		printf("Accepted connection from %s\n", connected_ip);
 
-		//recv_message = 'x';
-		while(recv_message != '\n')
+		is_client_disconnected = 0;
+		recv_response = 1;
+		while(is_client_disconnected == 0)
 		{
-			recv_response = recv(accepted_connection, &recv_message, 1, 0);
-
-			if(recv_response < 0)
+			recv_message = 'x';
+			while(recv_message != '\n')
 			{
-				return -1;
+				recv_response = recv(accepted_connection, &recv_message, 1, 0);
+
+				if(recv_response < 0)
+				{
+					return -1;
+				}
+				else if(recv_response != 0)
+				{
+					fprintf(fp, "%c", recv_message);
+					printf("%c", recv_message);
+				}
+				else
+				{
+					syslog(LOG_USER,"Closed connection from %s", connected_ip);
+				 	printf("Closed connection from %s\n", connected_ip);
+				 	is_client_disconnected = 1;
+					break;
+				}
 			}
-                        else if(recv_response == 0)
-                        {
-                         	syslog(LOG_USER, "Client disconnected");
-				//fflush(accepted_connection);
-				break;
-                        }
 
-			fprintf(fp, "%c", recv_message);
-			printf("%c", recv_message);
+			if(is_client_disconnected == 0)
+			{
+				//read from file and send back all data
+				rewind(fp);
+				while (!feof(fp)) 
+				{
+					char_from_file = fgetc(fp);
+					if(feof(fp)) break;
+					send(accepted_connection, &char_from_file, 1, 0);
+				}
+			}
 		}
-
-		//fprintf(fp, "\n");
-
-		//read from file and send back all data
-		rewind(fp);
-		while (!feof(fp)) 
-		{
-			char_from_file = fgetc(fp);
-			send(accepted_connection, &char_from_file, 1, 0);
-		}
-
-		//send(accepted_connection, "\n", 0, 0);
-		//send(accepted_connection, "string", 6, 0);
 
 		//client disconnected
+		// closing the connected socket
+		close(accepted_connection);
+		syslog(LOG_USER,"Closed connection from %s", connected_ip);
+		printf("Closed connection from %s\n", connected_ip);
+		// closing the listening socket
+		shutdown(server_fd, SHUT_RDWR);
 	}
 	
-	// fclose(fp);
-	// syslog(LOG_USER,"removing file...");
-	// printf("removing file...\n");
-	// remove("/var/tmp/aesdsocketdata");
-
-	// // closing the connected socket
-	// close(accepted_connection);
-	// syslog(LOG_USER,"Closed connection from %s", connected_ip);
-	// printf("Closed connection from %s\n", connected_ip);
-	// // closing the listening socket
-	// shutdown(server_fd, SHUT_RDWR);
 	return 0;
 }
 
@@ -163,4 +164,6 @@ void sigintHandler(int sig)
 	syslog(LOG_USER,"removing file...");
 	printf("removing file...\n");
 	remove("/var/tmp/aesdsocketdata");
+
+	is_client_disconnected = 1;
 }
