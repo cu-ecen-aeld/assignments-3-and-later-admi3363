@@ -9,11 +9,11 @@ SRCS= ${HFILES} ${CFILES}
 OBJS= ${CFILES:.c=.o}
 
 all: 
-	$(CC) aesdsocket.c -o aesdsocket
+	$(CC) $(CFLAGS) aesdsocket.c -o aesdsocket
 
 clean:
 	-rm -f *.o *.d
 	-rm -f $(OUTPUT)
 
 default: 
-	$(CC) aesdsocket.c -o aesdsocket
+	$(CC) $(CFLAGS) aesdsocket.c -o aesdsocket

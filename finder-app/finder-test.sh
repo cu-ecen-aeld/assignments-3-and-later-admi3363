@@ -49,7 +49,7 @@ fi
 
 for i in $( seq 1 $NUMFILES)
 do
-	${RUNNING_DIR}/writer.sh "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	${RUNNING_DIR}/writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 done
 
 OUTPUTSTRING=$(${RUNNING_DIR}/finder.sh "$WRITEDIR" "$WRITESTR")
