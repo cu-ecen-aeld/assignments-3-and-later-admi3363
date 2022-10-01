@@ -75,21 +75,25 @@ int main(int argc, char const* argv[])
     }
 
 	//open file
-	fp = fopen("/var/tmp/aesdsocketdata","w+");
+	fp = fopen("/var/tmp/aesdsocketdata","a+");
 
 	//loop until SIGINT or SIGTERM
-	while(is_listening_for_connections == 0)
+	while(1)
 	{
+		printf("Listening for connections.....\n");
+
 		if (listen(server_fd, 5) < 0) 
 		{
-			syslog(LOG_ERR,"listen failed");
+			syslog(LOG_ERR,"Listening for connections failed");
+			printf("Listening for connections failed\n");
 			is_listening_for_connections = 1;
 			return -1;
 		}
 
 		if ((accepted_connection = accept(server_fd, (struct sockaddr*)&address,(socklen_t*)&addrlen))< 0) 
 		{
-			syslog(LOG_ERR,"accept failed");
+			syslog(LOG_ERR,"Accepting connections failed");
+			printf("Accepting connections failed\n");
 			is_listening_for_connections = 1;
 			return -1;
 		}
@@ -110,7 +114,7 @@ int main(int argc, char const* argv[])
 
 				if(recv_response < 0)
 				{
-					is_listening_for_connections = 1;
+					//is_listening_for_connections = 1;
 					return -1;
 				}
 				else if(recv_response != 0)
@@ -142,12 +146,18 @@ int main(int argc, char const* argv[])
 
 		//client disconnected
 		close(accepted_connection);
+		shutdown(accepted_connection, SHUT_RDWR);
 		syslog(LOG_USER,"Closed connection from %s", connected_ip);
-		printf("Closed connection from %s\n", connected_ip);	
+		printf("Closed connection from %s\n", connected_ip);
+
+		// fclose(fp);
+		// syslog(LOG_USER,"removing file...");
+		// printf("removing file...\n");
+		// remove("/var/tmp/aesdsocketdata");
 	}
 
 	// closing the listening socket
-	shutdown(server_fd, SHUT_RDWR);
+	//shutdown(server_fd, SHUT_RDWR);
 	
 	return 0;
 }
@@ -157,17 +167,19 @@ void sigintHandler(int sig)
 	syslog(LOG_USER,"Caught signal, exiting");
 	printf("\nCaught signal, exiting\n");
 
-    // closing the connected socket
-	close(accepted_connection);
-	syslog(LOG_USER,"Closed connection from %s", connected_ip);
-	printf("Closed connection from %s\n", connected_ip);
-	// closing the listening socket
-	shutdown(server_fd, SHUT_RDWR);
-
 	fclose(fp);
 	syslog(LOG_USER,"removing file...");
 	printf("removing file...\n");
 	remove("/var/tmp/aesdsocketdata");
+
+    // closing the connected socket
+	close(accepted_connection);
+	close(server_fd);
+	syslog(LOG_USER,"Closed connection from %s", connected_ip);
+	printf("Closed connection from %s\n", connected_ip);
+
+	shutdown(server_fd, SHUT_RDWR);
+	shutdown(accepted_connection, SHUT_RDWR);
 
 	is_client_disconnected = 1;
 	is_listening_for_connections = 1;
