@@ -23,7 +23,7 @@ void TalkingToClient();
 
 int main(int argc, char const* argv[])
 {
-	int recv_response;
+	//int recv_response;
 	struct sockaddr_in address;
 	int opt = 1;
 	int addrlen = sizeof(address);
@@ -167,9 +167,10 @@ int main(int argc, char const* argv[])
 
 void TalkingToClient()
 {
+	int recv_response;
 	char recv_message;
 	char char_from_file;
-	is_client_disconnected = 0;
+	int is_client_disconnected = 0;
 	//recv_message = 'x';
 	while(recv_message != '\n')
 	{
@@ -209,6 +210,7 @@ void TalkingToClient()
 
 void TalkingToClientOrig()
 {
+	int recv_response;
 	char recv_message;
 	char char_from_file;
 	is_client_disconnected = 0;

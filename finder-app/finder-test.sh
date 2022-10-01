@@ -9,7 +9,7 @@ NUMFILES=10
 WRITESTR=AELD_IS_FUN
 WRITEDIR=/tmp/aeld-data
 username=$(cat /etc/finder-app/conf/username.txt)
-RUNNING_DIR=$(realpath $(dirname $0))
+#RUNNING_DIR=$(realpath $(dirname $0))
 
 
 if [ $# -lt 2 ]
@@ -49,10 +49,12 @@ fi
 
 for i in $( seq 1 $NUMFILES)
 do
-	${RUNNING_DIR}/writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	#${RUNNING_DIR}/writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 done
 
-OUTPUTSTRING=$(${RUNNING_DIR}/finder.sh "$WRITEDIR" "$WRITESTR")
+# OUTPUTSTRING=$(${RUNNING_DIR}/finder.sh "$WRITEDIR" "$WRITESTR")
+OUTPUTSTRING=$(finder.sh "$WRITEDIR" "$WRITESTR")
 
 echo "${OUTPUTSTRING}" > /tmp/assignment4-result.txt
 
