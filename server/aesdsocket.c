@@ -97,12 +97,27 @@ int main(int argc, char const* argv[])
 		syslog(LOG_USER,"Accepted connection from %s", connected_ip);
 		printf("Accepted connection from %s\n", connected_ip);
 
+		//recv_message = 'x';
 		while(recv_message != '\n')
 		{
 			recv_response = recv(accepted_connection, &recv_message, 1, 0);
+
+			if(recv_response < 0)
+			{
+				return -1;
+			}
+                        else if(recv_response == 0)
+                        {
+                         	syslog(LOG_USER, "Client disconnected");
+				//fflush(accepted_connection);
+				break;
+                        }
+
 			fprintf(fp, "%c", recv_message);
 			printf("%c", recv_message);
 		}
+
+		//fprintf(fp, "\n");
 
 		//read from file and send back all data
 		rewind(fp);
@@ -112,27 +127,30 @@ int main(int argc, char const* argv[])
 			send(accepted_connection, &char_from_file, 1, 0);
 		}
 
+		//send(accepted_connection, "\n", 0, 0);
+		//send(accepted_connection, "string", 6, 0);
+
 		//client disconnected
 	}
 	
-	fclose(fp);
-	syslog(LOG_USER,"removing file...");
-	printf("removing file...\n");
-	remove("/var/tmp/aesdsocketdata");
+	// fclose(fp);
+	// syslog(LOG_USER,"removing file...");
+	// printf("removing file...\n");
+	// remove("/var/tmp/aesdsocketdata");
 
-	// closing the connected socket
-	close(accepted_connection);
-	syslog(LOG_USER,"Closed connection from %s", connected_ip);
-	printf("Closed connection from %s\n", connected_ip);
-	// closing the listening socket
-	shutdown(server_fd, SHUT_RDWR);
+	// // closing the connected socket
+	// close(accepted_connection);
+	// syslog(LOG_USER,"Closed connection from %s", connected_ip);
+	// printf("Closed connection from %s\n", connected_ip);
+	// // closing the listening socket
+	// shutdown(server_fd, SHUT_RDWR);
 	return 0;
 }
 
 void sigintHandler(int sig)
 {
 	syslog(LOG_USER,"Caught signal, exiting");
-	printf("Caught signal, exiting\n");
+	printf("\nCaught signal, exiting\n");
 
     // closing the connected socket
 	close(accepted_connection);
