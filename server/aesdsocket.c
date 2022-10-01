@@ -15,6 +15,7 @@ int accepted_connection;
 FILE *fp = NULL;
 char connected_ip[INET_ADDRSTRLEN];
 int is_client_disconnected = 0;
+int is_listening_for_connections = 0;
 
 
 void sigintHandler(int sig);
@@ -77,17 +78,19 @@ int main(int argc, char const* argv[])
 	fp = fopen("/var/tmp/aesdsocketdata","w+");
 
 	//loop until SIGINT or SIGTERM
-	while(1)
+	while(is_listening_for_connections == 0)
 	{
 		if (listen(server_fd, 5) < 0) 
 		{
 			syslog(LOG_ERR,"listen failed");
+			is_listening_for_connections = 1;
 			return -1;
 		}
 
 		if ((accepted_connection = accept(server_fd, (struct sockaddr*)&address,(socklen_t*)&addrlen))< 0) 
 		{
 			syslog(LOG_ERR,"accept failed");
+			is_listening_for_connections = 1;
 			return -1;
 		}
 
@@ -107,6 +110,7 @@ int main(int argc, char const* argv[])
 
 				if(recv_response < 0)
 				{
+					is_listening_for_connections = 1;
 					return -1;
 				}
 				else if(recv_response != 0)
@@ -116,8 +120,8 @@ int main(int argc, char const* argv[])
 				}
 				else
 				{
-					syslog(LOG_USER,"Closed connection from %s", connected_ip);
-				 	printf("Closed connection from %s\n", connected_ip);
+					// syslog(LOG_USER,"Closed connection from %s", connected_ip);
+				 	// printf("Closed connection from %s\n", connected_ip);
 				 	is_client_disconnected = 1;
 					break;
 				}
@@ -137,13 +141,13 @@ int main(int argc, char const* argv[])
 		}
 
 		//client disconnected
-		// closing the connected socket
 		close(accepted_connection);
 		syslog(LOG_USER,"Closed connection from %s", connected_ip);
-		printf("Closed connection from %s\n", connected_ip);
-		// closing the listening socket
-		shutdown(server_fd, SHUT_RDWR);
+		printf("Closed connection from %s\n", connected_ip);	
 	}
+
+	// closing the listening socket
+	shutdown(server_fd, SHUT_RDWR);
 	
 	return 0;
 }
@@ -166,4 +170,5 @@ void sigintHandler(int sig)
 	remove("/var/tmp/aesdsocketdata");
 
 	is_client_disconnected = 1;
+	is_listening_for_connections = 1;
 }
