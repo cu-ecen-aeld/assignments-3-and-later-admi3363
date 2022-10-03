@@ -14,28 +14,17 @@ int server_fd;
 int accepted_connection;
 FILE *fp = NULL;
 char connected_ip[INET_ADDRSTRLEN];
-//int is_client_disconnected = 0;
-//int is_listening_for_connections = 0;
-
 
 void SignalHandler(int sig);
 void TalkingToClient();
-//void TalkingToClientOrig();
 
 int main(int argc, char const* argv[])
 {
-	//int recv_response;
 	struct sockaddr_in address;
 	int opt = 1;
 	int addrlen = sizeof(address);
-	//char recv_message;
 	pid_t pid;
-	//char char_from_file;
 
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(PORT);
-	
 	signal(SIGINT, SignalHandler);
 	signal(SIGTERM, SignalHandler);
 
@@ -54,6 +43,10 @@ int main(int argc, char const* argv[])
 		//printf("Failed setting socket options\n");
 		return -1;
 	}
+
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = INADDR_ANY;
+	address.sin_port = htons(PORT);
 
 	if (bind(server_fd, (struct sockaddr*)&address,sizeof(address))< 0) 
     {
@@ -84,8 +77,6 @@ int main(int argc, char const* argv[])
 	//loop until SIGINT or SIGTERM
 	while(1)
 	{
-		//printf("Listening for connections.....\n");
-
 		if (listen(server_fd, 5) < 0) 
 		{
 			syslog(LOG_ERR,"Listening for connections failed");
@@ -100,39 +91,33 @@ int main(int argc, char const* argv[])
 			return -1;
 		}
 
-		inet_ntop(AF_INET, &(address.sin_addr), connected_ip, INET_ADDRSTRLEN);
+		if(inet_ntop(AF_INET, &(address.sin_addr), connected_ip, INET_ADDRSTRLEN) == NULL)
+		{
+			return -1;
+		}
 
 		syslog(LOG_USER,"Accepted connection from %s", connected_ip);
-		//printf("Accepted connection from %s\n", connected_ip);
+		// printf("Accepted connection from %s\n", connected_ip);
 
 		TalkingToClient();
 
 		// //client disconnected
 		// close(accepted_connection);
 		// shutdown(accepted_connection, SHUT_RDWR);
-	    syslog(LOG_USER,"Closed connection from %s", connected_ip);
+	    //syslog(LOG_USER,"Closed connection from %s", connected_ip);
 		//printf("Closed connection from %s\n", connected_ip);
-
-		///signal(SIGTERM, SignalHandler);
-
-		// fclose(fp);
-		// syslog(LOG_USER,"removing file...");
-		// printf("removing file...\n");
-		// remove("/var/tmp/aesdsocketdata");
 	}
-
-	// closing the listening socket
-	//shutdown(server_fd, SHUT_RDWR);
 	
+	//free(fp);
+
 	return 0;
 }
 
 void TalkingToClient()
 {
-	int recv_response, buffer_item_count = 1;
-	char recv_message = 'x';
+	int recv_response;
+	char recv_message;
 	char char_from_file;
-	char buffer[4000] = {0};
 	//int is_client_disconnected = 0;
 	while(recv_message != '\n')
 	{
@@ -145,28 +130,10 @@ void TalkingToClient()
 
 		if(recv_response == 0)
 		{
-			signal(SIGTERM, SignalHandler);
+			//signal(SIGTERM, SignalHandler);
 		}
 
 		fprintf(fp, "%c", recv_message);
-		//printf("%c", recv_message);
-		
-		// int cnt = 1;
-		// if(recv_message == '\n')
-		// {
-		// 	while(cnt < buffer_item_count)
-		// 	{
-		// 		fprintf(fp, "%c", buffer[cnt]);
-		// 		cnt++;
-		// 	}
-		// }
-		// else
-		// {
-		// 	// fprintf(fp, "%c", recv_message);
-		// 	// printf("%c", recv_message);
-		// 	buffer[buffer_item_count] = recv_message;
-		// 	buffer_item_count++;
-		// }
 	}
 
 	//read from file and send back all data
@@ -179,62 +146,10 @@ void TalkingToClient()
 	}
 }
 
-// void TalkingToClientOrig()
-// {
-// 	int recv_response;
-// 	char recv_message;
-// 	char char_from_file;
-// 	is_client_disconnected = 0;
-// 	recv_response = 1;
-// 	while(is_client_disconnected == 0)
-// 	{
-// 		recv_message = 'x';
-// 		while(recv_message != '\n')
-// 		{
-// 			recv_response = recv(accepted_connection, &recv_message, 1, 0);
-
-// 			if(recv_response < 0)
-// 			{
-// 				//is_listening_for_connections = 1;
-// 				return -1;
-// 			}
-// 			else if(recv_response != 0)
-// 			{
-// 				fprintf(fp, "%c", recv_message);
-// 				printf("%c", recv_message);
-// 			}
-// 			else
-// 			{
-// 				// syslog(LOG_USER,"Closed connection from %s", connected_ip);
-// 				// printf("Closed connection from %s\n", connected_ip);
-// 				is_client_disconnected = 1;
-// 				break;
-// 			}
-// 		}
-
-// 		if(is_client_disconnected == 0)
-// 		{
-// 			//read from file and send back all data
-// 			rewind(fp);
-// 			while (!feof(fp)) 
-// 			{
-// 				char_from_file = fgetc(fp);
-// 				if(feof(fp)) break;
-// 				send(accepted_connection, &char_from_file, 1, 0);
-// 			}
-// 		}
-// 	}
-// }
-
 void SignalHandler(int sig)
 {
 	syslog(LOG_USER,"Caught signal, exiting");
 	//printf("\nCaught signal, exiting\n");
-
-	fclose(fp);
-	syslog(LOG_USER,"removing file...");
-	//printf("removing file...\n");
-	remove("/var/tmp/aesdsocketdata");
 
     // closing the connected socket
 	close(accepted_connection);
@@ -244,8 +159,11 @@ void SignalHandler(int sig)
 
     shutdown(accepted_connection, SHUT_RDWR);
 	shutdown(server_fd, SHUT_RDWR);
-	
 
-	//is_client_disconnected = 1;
-	//is_listening_for_connections = 1;
+	fclose(fp);
+	syslog(LOG_USER,"removing file...");
+	//printf("removing file...\n");
+	remove("/var/tmp/aesdsocketdata");
+
+	//exit(0);
 }
