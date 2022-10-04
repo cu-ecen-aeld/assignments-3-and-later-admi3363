@@ -9,7 +9,7 @@ NUMFILES=10
 WRITESTR=AELD_IS_FUN
 WRITEDIR=/tmp/aeld-data
 username=$(cat /etc/finder-app/conf/username.txt)
-#RUNNING_DIR=$(realpath $(dirname $0))
+RUNNING_DIR=$(realpath $(dirname $0))
 
 
 if [ $# -lt 2 ]
