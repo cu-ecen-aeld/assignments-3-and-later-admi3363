@@ -49,12 +49,12 @@ fi
 
 for i in $( seq 1 $NUMFILES)
 do
-	#${RUNNING_DIR}/writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
-	writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	${RUNNING_DIR}/writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	#./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 done
 
-# OUTPUTSTRING=$(${RUNNING_DIR}/finder.sh "$WRITEDIR" "$WRITESTR")
-OUTPUTSTRING=$(finder.sh "$WRITEDIR" "$WRITESTR")
+OUTPUTSTRING=$(${RUNNING_DIR}/finder.sh "$WRITEDIR" "$WRITESTR")
+#OUTPUTSTRING=$(./finder.sh "$WRITEDIR" "$WRITESTR")
 
 echo "${OUTPUTSTRING}" > /tmp/assignment4-result.txt
 

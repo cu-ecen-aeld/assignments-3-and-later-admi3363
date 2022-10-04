@@ -1,5 +1,5 @@
 #CC=$(CROSS_COMPILE)gcc
-CC=aarch64-none-linux-gnu-gcc
+#CC=aarch64-none-linux-gnu-gcc
 
 CFLAGS= -g -Wall
 CFILES= writer.c
@@ -9,7 +9,7 @@ SRCS= ${HFILES} ${CFILES}
 OBJS= ${CFILES:.c=.o}
 
 all: writer
-	aarch64-none-linux-gnu-gcc -g -Wall writer.c -o writer
+	$(CC) $(CFLAGS) writer.c -o writer
 
 
 clean:
