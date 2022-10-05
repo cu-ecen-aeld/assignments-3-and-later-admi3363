@@ -1,7 +1,7 @@
 #CC=gcc
 #CC=aarch64-none-linux-gnu-gcc
 
-CFLAGS= -g -Wall
+CFLAGS= -g
 CFILES= aesdsocket.c
 OUTPUT=aesdsocket
 

@@ -43,6 +43,7 @@ else
 	exit 1
 fi
 
+
 #echo "Removing the old writer utility and compiling as a native application"
 #make clean
 #make
@@ -50,11 +51,9 @@ fi
 for i in $( seq 1 $NUMFILES)
 do
 	${RUNNING_DIR}/writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
-	#./writer "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 done
 
 OUTPUTSTRING=$(${RUNNING_DIR}/finder.sh "$WRITEDIR" "$WRITESTR")
-#OUTPUTSTRING=$(./finder.sh "$WRITEDIR" "$WRITESTR")
 
 echo "${OUTPUTSTRING}" > /tmp/assignment4-result.txt
 

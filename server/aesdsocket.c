@@ -37,7 +37,7 @@ int main(int argc, char const* argv[])
 	}
 
 	// if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) 
-	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) 
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_LINGER, &opt, sizeof(opt))) 
     {
 		syslog(LOG_ERR,"failed setting socket options");
 		//printf("Failed setting socket options\n");
@@ -56,7 +56,7 @@ int main(int argc, char const* argv[])
 	}
 
 	//fork after binding to port
-	if(argc==2 && argv[1][1] == 'd') 
+	if(argc==2 && argv[1][1] == '-d') 
 	{
 		pid = fork();
 
@@ -102,13 +102,11 @@ int main(int argc, char const* argv[])
 		TalkingToClient();
 
 		// //client disconnected
-		// close(accepted_connection);
-		// shutdown(accepted_connection, SHUT_RDWR);
-	    //syslog(LOG_USER,"Closed connection from %s", connected_ip);
+		close(accepted_connection);
+        shutdown(accepted_connection, SHUT_RDWR);
+	    syslog(LOG_USER,"Closed connection from %s", connected_ip);
 		//printf("Closed connection from %s\n", connected_ip);
 	}
-	
-	//free(fp);
 
 	return 0;
 }
@@ -130,6 +128,7 @@ void TalkingToClient()
 
 		if(recv_response == 0)
 		{
+			close(accepted_connection);
 			//signal(SIGTERM, SignalHandler);
 		}
 
@@ -164,6 +163,4 @@ void SignalHandler(int sig)
 	syslog(LOG_USER,"removing file...");
 	//printf("removing file...\n");
 	remove("/var/tmp/aesdsocketdata");
-
-	//exit(0);
 }
