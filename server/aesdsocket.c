@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <syslog.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
 #define PORT 9000
@@ -18,7 +21,7 @@ char connected_ip[INET_ADDRSTRLEN];
 void SignalHandler(int sig);
 void TalkingToClient();
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
 	struct sockaddr_in address;
 	int opt = 1;
@@ -56,9 +59,9 @@ int main(int argc, char const* argv[])
 	}
 
 	//fork after binding to port
-	if(argc==2 && argv[1][1] == '-d') 
+	if(argc > 1 &&  argv[1][1] == 'd') 
 	{
-		pid = fork();
+     	pid = fork();
 
 		if (setsid() < 0)
 		{
@@ -69,6 +72,10 @@ int main(int argc, char const* argv[])
 		{
 			return -1;
 		}
+
+		umask(0);
+		chdir("/");
+		open("/dev/null", O_RDWR);
     }
 
 	// //open file
