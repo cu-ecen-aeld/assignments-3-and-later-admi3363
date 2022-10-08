@@ -3,7 +3,7 @@
 
 CFLAGS= -O0 -g -Wall -Werror
 CFILES= aesdsocket.c
-OUTPUT= aesdsocket
+OUTPUT=aesdsocket
 
 all: aesdsocket
 
@@ -14,4 +14,4 @@ clean:
 	-rm -f $(OUTPUT)
 
 aesdsocket:
-	$(CC) $(CFLAGS) $(CFILES) -o $(OUTPUT)
+	aarch64-none-linux-gnu-gcc $(CFLAGS) $(CFILES) -o $(OUTPUT)
