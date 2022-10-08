@@ -127,6 +127,8 @@ void TalkingToClient()
 	int recv_response = 0;
 	char recv_message = 'a';
 	char char_from_file;
+	char buffer[2000] = {0};
+	size_t current_size = 0;
 	//int is_client_disconnected = 0;
 	while(recv_message != '\n')
 	{
@@ -143,7 +145,17 @@ void TalkingToClient()
 			//signal(SIGTERM, SignalHandler);
 		}
 
+		//buffer[current_size++] = recv_message;
 		fprintf(fp, "%c", recv_message);
+	}
+
+
+	//int numberOfCharsInBuffer = current_size;
+	int i = 0;
+	while(i < current_size)
+	{
+		fprintf(fp, "%c", buffer[i]);
+		i++;
 	}
 
 	//read from file and send back all data
