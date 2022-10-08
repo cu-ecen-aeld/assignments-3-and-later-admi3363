@@ -5,9 +5,6 @@ CFLAGS= -O0 -g -Wall -Werror
 CFILES= aesdsocket.c
 OUTPUT= aesdsocket
 
-SRCS= ${HFILES} ${CFILES}
-OBJS= ${CFILES:.c=.o}
-
 all: aesdsocket
 
 default: aesdsocket
