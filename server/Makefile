@@ -1,7 +1,7 @@
 #CC=$(CROSS_COMPILE)gcc
 #CC=aarch64-none-linux-gnu-gcc
 
-CFLAGS= -g -Wall -Werror
+CFLAGS= -O0 -g -Wall -Werror
 CFILES= aesdsocket.c
 OUTPUT=aesdsocket
 
