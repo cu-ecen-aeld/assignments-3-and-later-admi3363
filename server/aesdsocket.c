@@ -66,22 +66,31 @@ int main(int argc, char const *argv[])
 		syslog(LOG_ERR,"Entering daemon mode for aesdsocket");
 
      	pid = fork();
+		if (pid < 0)
+		{
+        	exit(EXIT_FAILURE);
+		}
 
-		umask(0);
+		if (pid > 0)
+		{
+        	exit(EXIT_SUCCESS);
+		}
 
-		// sid = setsid();
-		// if (sid < 0)
-		// {
-		// 	syslog(LOG_ERR,"creating session for aesdsocket failed");
-     	// 	return -1;
-		// }
+		//umask(0);
+
+		sid = setsid();
+		if (sid < 0)
+		{
+			syslog(LOG_ERR,"creating session for aesdsocket failed");
+     		return -1;
+		}
 	
 		// if (pid > 0)
 		// {
 		// 	return -1;
 		// }
 
-		//umask(0);
+		umask(0);
 		chdir("/");
 		open("/dev/null", O_RDWR);
     }
