@@ -11,6 +11,8 @@
 #/etc/init.d/Saesdsocket start
 #/etc/init.d/Saesdsocket stop
 
+#Install your aesdsocket-start-stop script to /etc/init.d/S99aesdsocket
+
 case "$1" in
     start)
         echo "Starting aesdsocket"

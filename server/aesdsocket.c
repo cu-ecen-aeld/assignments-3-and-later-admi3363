@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <arpa/inet.h>
 
 
 #define PORT 9000
@@ -121,7 +122,7 @@ int main(int argc, char const *argv[])
 void TalkingToClient()
 {
 	int recv_response;
-	char recv_message = 'x';
+	char recv_message;
 	char char_from_file;
 	//int is_client_disconnected = 0;
 	while(recv_message != '\n')

@@ -1,14 +1,14 @@
-#CC=gcc
+#CC=$(CROSS_COMPILE)gcc
 #CC=aarch64-none-linux-gnu-gcc
 
-CFLAGS= -g -Wall
+CFLAGS= -g -Wall -Werror
 CFILES= aesdsocket.c
 OUTPUT=aesdsocket
 
 SRCS= ${HFILES} ${CFILES}
 OBJS= ${CFILES:.c=.o}
 
-all: 
+all: aesdsocket
 	$(CC) $(CFLAGS) aesdsocket.c -o aesdsocket
 
 clean:
