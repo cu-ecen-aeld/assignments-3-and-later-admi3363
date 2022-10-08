@@ -121,8 +121,8 @@ int main(int argc, char const *argv[])
 
 void TalkingToClient()
 {
-	int recv_response;
-	char recv_message;
+	int recv_response = 0;
+	char recv_message = 'a';
 	char char_from_file;
 	//int is_client_disconnected = 0;
 	while(recv_message != '\n')
