@@ -27,7 +27,8 @@ int main(int argc, char const *argv[])
 	struct sockaddr_in address;
 	int opt = 1;
 	int addrlen = sizeof(address);
-	pid_t pid;
+	pid_t pid = 0;
+	pid_t sid = 0;
 
 	signal(SIGINT, SignalHandler);
 	signal(SIGTERM, SignalHandler);
@@ -56,7 +57,7 @@ int main(int argc, char const *argv[])
     {
 		syslog(LOG_ERR,"bind to socket failed");
 		//printf("Bind to socket failed\n");
-		return -1;
+		//return -1;
 	}
 
 	//fork after binding to port
@@ -66,16 +67,19 @@ int main(int argc, char const *argv[])
 
      	pid = fork();
 
-		if (setsid() < 0)
-		{
-			syslog(LOG_ERR,"creating sesion for aesdsocket failed");
-     		return -1;
-		}
+		umask(0);
+
+		// sid = setsid();
+		// if (sid < 0)
+		// {
+		// 	syslog(LOG_ERR,"creating session for aesdsocket failed");
+     	// 	return -1;
+		// }
 	
-		if (pid > 0)
-		{
-			return -1;
-		}
+		// if (pid > 0)
+		// {
+		// 	return -1;
+		// }
 
 		//umask(0);
 		chdir("/");
