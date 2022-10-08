@@ -62,10 +62,13 @@ int main(int argc, char const *argv[])
 	//fork after binding to port
 	if(argc > 1 &&  argv[1][1] == 'd') 
 	{
+		syslog(LOG_ERR,"Entering daemon mode for aesdsocket");
+
      	pid = fork();
 
 		if (setsid() < 0)
 		{
+			syslog(LOG_ERR,"creating sesion for aesdsocket failed");
      		return -1;
 		}
 	

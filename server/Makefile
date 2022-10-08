@@ -1,4 +1,4 @@
-#CC=$(CROSS_COMPILE)gcc
+CC=$(CROSS_COMPILE)gcc
 #CC=aarch64-none-linux-gnu-gcc
 
 CFLAGS= -O0 -g -Wall -Werror
@@ -14,4 +14,4 @@ clean:
 	-rm -f $(OUTPUT)
 
 aesdsocket:
-	aarch64-none-linux-gnu-gcc $(CFLAGS) $(CFILES) -o $(OUTPUT)
+	$(CC) $(CFLAGS) $(CFILES) -o $(OUTPUT)
