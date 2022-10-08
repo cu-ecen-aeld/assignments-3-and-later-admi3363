@@ -109,7 +109,7 @@ int main(int argc, char const *argv[])
 
 		TalkingToClient();
 
-		// //client disconnected
+		//client disconnected
 		close(accepted_connection);
         shutdown(accepted_connection, SHUT_RDWR);
 	    syslog(LOG_USER,"Closed connection from %s", connected_ip);

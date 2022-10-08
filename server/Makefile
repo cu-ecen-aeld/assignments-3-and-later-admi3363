@@ -3,17 +3,18 @@
 
 CFLAGS= -O0 -g -Wall -Werror
 CFILES= aesdsocket.c
-OUTPUT=aesdsocket
+OUTPUT= aesdsocket
 
 SRCS= ${HFILES} ${CFILES}
 OBJS= ${CFILES:.c=.o}
 
 all: aesdsocket
-	$(CC) $(CFLAGS) aesdsocket.c -o aesdsocket
+
+default: aesdsocket
 
 clean:
 	-rm -f *.o *.d
 	-rm -f $(OUTPUT)
 
-default: 
-	$(CC) $(CFLAGS) aesdsocket.c -o aesdsocket
+aesdsocket:
+	$(CC) $(CFLAGS) $(CFILES) -o $(OUTPUT)
