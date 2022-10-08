@@ -77,7 +77,7 @@ int main(int argc, char const *argv[])
 			return -1;
 		}
 
-		umask(0);
+		//umask(0);
 		chdir("/");
 		open("/dev/null", O_RDWR);
     }
